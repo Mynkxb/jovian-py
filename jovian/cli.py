@@ -4,7 +4,7 @@ import click
 
 from jovian._version import __version__
 from jovian.utils.clone import clone, pull
-from jovian.utils.configure import configure, reset
+from jovian.utils.configure import configure, reset_config
 from jovian.utils.extension import setup_extension
 from jovian.utils.install import activate, install
 from jovian.utils.slack import add_slack
@@ -13,7 +13,7 @@ from jovian.utils.slack import add_slack
 @click.group()
 @click.version_option(version=__version__, prog_name="Jovian")
 @click.pass_context
-def main(ctx=None, log_level="info"):
+def main(ctx, log_level="info"):
     """Keep track of your Jupyter notebooks using Jovian.
 
     Use within your Jupyter notebooks:
@@ -37,7 +37,7 @@ def help(ctx):
 
     # Pretend user typed 'jovian --help' instead of 'jovian help'.
     sys.argv[1] = "--help"
-    main(ctx)
+    main()
 
 
 @main.command('version')
@@ -47,7 +47,7 @@ def main_version(ctx):
 
     # Pretend user typed 'jovian --version' instead of 'jovian version'
     sys.argv[1] = "--version"
-    main(ctx)
+    main()
 
 
 @main.command("configure")
@@ -60,10 +60,9 @@ def create_config(ctx):
 
 @main.command("reset")
 @click.pass_context
-def reset_config(ctx):
+def reset(ctx):
     """Reset Jovian config."""
-
-    reset()
+    reset_config()
 
 
 @main.command("install", short_help="Install packages from environment file.")
@@ -86,7 +85,7 @@ def install_env(ctx, name=None):
     else:
         # Show help
         sys.argv[1] = "--help"
-        install_env(ctx)
+        install_env()
 
 
 @main.command("activate")
@@ -100,8 +99,9 @@ def activate_env(ctx):
 @main.command("clone", short_help="Clone a notebook hosted on Jovian")
 @click.argument('notebook')
 @click.option('-v', '--version', 'version')
+@click.option('--no-outputs', 'no_outputs')
 @click.pass_context
-def exec_clone(ctx, notebook, version):
+def exec_clone(ctx, notebook, version, no_outputs):
     """Clone a notebook hosted on Jovian:
 
         $ jovian clone aakashns/jovian-tutorial
@@ -111,7 +111,7 @@ def exec_clone(ctx, notebook, version):
         $ jovian clone aakashns/jovian-tutorial -v 10
     """
 
-    clone(notebook, version)
+    clone(notebook, version, not no_outputs)
 
 
 @main.command("pull", short_help="Fetch new version of notebook hosted Jovian.")
