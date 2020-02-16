@@ -1,1 +1,0 @@
-__flavor__ = "jovian"

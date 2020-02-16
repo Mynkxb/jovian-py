@@ -1,5 +1,0 @@
-[run]
-omit = jovian/tests/*
-
-[report]
-sort = Cover
