@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@jupyterlab/fileeditor": "^1.2.1"
+  }
+}
