@@ -25,6 +25,9 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+node_modules
+jovian/jovian_lab_ext/node_modules
+
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

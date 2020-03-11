@@ -1,15 +1,15 @@
 {
   "name": "jovian-lab-ext-test",
   "version": "0.1.0",
-  "description": "Add a run-all button on the notebook toolbar",
+  "description": "The platform for all your Data Science projects",
   "keywords": [
     "jupyter",
     "jupyterlab",
     "jupyterlab-extension"
   ],
-  "homepage": "https://github.com/JovianML/jovian-py/tree/ms/jupyterLab-Ext",
+  "homepage": "https://github.com/JovianML/jovian-py",
   "bugs": {
-    "url": "https://github.com/JovianML/jovian-py/tree/ms/jupyterLab-Ext/issues"
+    "url": "https://github.com/JovianML/jovian-py/issues"
   },
   "license": "BSD-3-Clause",
   "author": "Mayank Saboo",
@@ -22,7 +22,7 @@
   "style": "style/index.css",
   "repository": {
     "type": "git",
-    "url": "https://github.com/JovianML/jovian-py/tree/ms/jupyterLab-Ext.git"
+    "url": "https://github.com/JovianML/jovian-py/tree/lab-ext-npm-TEST"
   },
   "scripts": {
     "build": "tsc",
