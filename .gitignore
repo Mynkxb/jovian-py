@@ -120,5 +120,3 @@ dmypy.json
 # Mac OS
 .DS_Store
 
-jovian/_flavor.py
-node_modules
