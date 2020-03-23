@@ -131,6 +131,136 @@ define([
           }
         });
       });
+  /*************************************** SIDE_BAR : helper functions ******************************************/
+  const getUsername = () => {
+    /*
+      This function will get the current
+      User of the notebook, and later it
+      will be display in the side bar 
+    */
+    
+    return new Promise(resolve => {
+        
+        const valStatus = data => {
+          resolve(data.content.text.trim());
+        }
+  
+        const username =
+  
+        "from jovian.utils.api import get_current_user\n"+
+        "user = get_current_user()\n"+
+        "name = user['username']\n"+
+        "print(name)\n";
+  
+         Jupyter.notebook.kernel.execute(username, {
+          iopub: { output: valStatus }
+        });
+  
+      })
+    }
+    getUsername().then(data=>{window.displayName = data});
+
+    const getNotebookcurrent = () => {
+      /*
+        This function will get the 
+        current notebook name. And 
+        it will be display in the side bar
+      */
+        
+        return new Promise(resolve => {
+          
+          const valStatus = data => {
+            resolve(data.content.text.trim());
+          }
+    
+          const Notebookcurrent =
+    
+          "from jovian.utils.jupyter import get_notebook_name\n"+
+          "nb_name = get_notebook_name()\n"+
+          "display_nb_name = nb_name[:-6]\n"+
+          "print(display_nb_name)\n";
+          
+           Jupyter.notebook.kernel.execute(Notebookcurrent, {
+            iopub: { output: valStatus }
+          });
+    
+        })
+      }
+      getNotebookcurrent().then(data=>{window.displayNotebook = data});
+  /*************************************** MODULE_4: Share Dialog ***********************************************/
+
+  const getUrl = () => {
+    /**
+    This is a helper function to generate a project URL for later use.
+    the URL will be read by the shareWindow function.
+    **/
+      
+      return new Promise(resolve => {
+        
+        const valStatus = data => {
+          resolve(data.content.text.trim());
+        }
+  
+        const rc =
+      
+        /*
+          The following is python code. the variable
+          i will read the notebook name. the variable 
+          x will open the the rc file. x = lib[i] will 
+          match the current notebook name with the 
+          appropriate id in the lib rc. the i2 = i[:-6] 
+          will get rid of of .pynd , then the url will be 
+          generated with the following line of code.
+          URL = 'https://jovian.ml/'+i2+'/'+x2'
+        */
+  
+        "from jovian.utils.jupyter import get_notebook_name\n"+
+        "from jovian.utils.jupyter import get_notebook_history\n"+
+        "from jovian.utils.jupyter import set_notebook_name\n"+
+        "from jovian.utils.jupyter import get_notebook_path\n"+
+        "from jovian.utils.jupyter import get_notebook_path_py\n"+
+        "i = get_notebook_name()\n"+
+        "import json\n"+
+        "with open('.jovianrc') as f:\n"+
+        "\tjovianrc = json.load(f)\n"+
+        "lib = jovianrc['notebooks']\n"+
+        "x = lib[i]\n"+
+        "x2 = x['slug']\n"+
+        "i2 = i[:-6]\n"+
+        "URL = 'https://jovian.ml/'+i2+'/'+x2\n"+
+        "print(URL)\n";
+  
+         Jupyter.notebook.kernel.execute(rc, {
+          iopub: { output: valStatus }
+        });
+  
+      })
+    }
+    getUrl().then(data=>{window.tt = data});
+  
+    function shareWindow() {
+      /*
+      This function generates a window that displays
+      the social media buttons. The buttons are the following: 
+      facebook, twitter, linkedin, and  copy link.
+      These buttons will share the current notebook that 
+      was commited to Jovian.
+      */
+    
+      var facebook = "<div><script async defer crossorigin='anonymous' src='https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v5.0'></script><script type='text/javascript'>var V = tt;</script><div class='fb-share-button' data-href='"+tt+"' data-layout='button_count' data-size='large'><a target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fjovian.ml%2F&amp;src=sdkpreparse' class='fb-xfbml-parse-ignore'></a></div>";
+      var twitter = '<div><a class="twitter-share-button" href="https://twitter.com/intent/tweet" data-size="large" data-text="custom text" data-url='+tt+' data-hashtags="" data-via="" data-related="twitterapi,twitter">Tweet</a><script>window.twttr = (function(d, s, id) { var js, fjs = d.getElementsByTagName(s)[0], t = window.twttr || {}; if (d.getElementById(id)) return t; js = d.createElement(s); js.id = id; js.src = "https://platform.twitter.com/widgets.js"; fjs.parentNode.insertBefore(js, fjs); t._e = []; t.ready = function(f) { t._e.push(f);}; return t;} (document, "script", "twitter-wjs"));</script></div>';
+      var linkedin = "<div><script src='https://platform.linkedin.com/in.js' type='text/javascript'>lang: en_US</script><script type='IN/Share' data-url='"+tt+"'></script></div>";
+      //var copylink = "<div><input type='text' value='"+tt+"' id='myInput'><button onclick = 'myFunction()'>Copy Link</button><script>function myFunction(){var copyText = document.getElementById('myInput'); copyText.select(); copyText.setSelectionRange(0, 99999); document.execCommand('copy'); alert('Copied the link: ' + copyText.value);}</script></div>";
+    
+      var html = '<html><body><h>'+facebook+'</h><br><br><h>'+twitter+'</h><br><h>'+linkedin+'</h></body></html>';
+      let iframe = document.createElement("IFRAME");
+          iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(html);
+          iframe.height = '140px';
+          document.body.appendChild(iframe);
+          return iframe;
+        }
+  
+    /**************************************************** end of Module_4: Share Dialog **************************************/
 
     function updateForm(jvn_modal, shown = false) {
       /**
@@ -195,7 +325,10 @@ define([
                   .text("Committed Successfully! ")
                   .append($("<br/>"))
                   .append(nb_link)
-                  .append(copy_btn);
+                  .append(copy_btn)
+                  .append($("<br/>"))
+                  .append($("<br/>"))
+                  .append(shareWindow()); // <------------------- Module_4: Share Dialog -------------
               } else {
                 jvn_modal.find("#i_label").text("Commit failed! " + log_data);
               }
@@ -516,6 +649,49 @@ define([
       return form;
     };
 
+    // shareUI //
+
+    const shareUI = function() {
+
+      const div = $("<div/>").attr("id", "input_div");
+
+      const testing_label = $("<label/>")
+      .attr("id", "i_label")
+      .text("with God everything is possible!");
+
+      var facebook = "<div><script async defer crossorigin='anonymous' src='https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v5.0'></script><script type='text/javascript'>var V = tt;</script><div class='fb-share-button' data-href='"+tt+"' data-layout='button_count' data-size='large'><a target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fjovian.ml%2F&amp;src=sdkpreparse' class='fb-xfbml-parse-ignore'></a></div>";
+      var twitter = '<div><a class="twitter-share-button" href="https://twitter.com/intent/tweet" data-size="large" data-text="custom text" data-url='+tt+' data-hashtags="" data-via="" data-related="twitterapi,twitter">Tweet</a><script>window.twttr = (function(d, s, id) { var js, fjs = d.getElementsByTagName(s)[0], t = window.twttr || {}; if (d.getElementById(id)) return t; js = d.createElement(s); js.id = id; js.src = "https://platform.twitter.com/widgets.js"; fjs.parentNode.insertBefore(js, fjs); t._e = []; t.ready = function(f) { t._e.push(f);}; return t;} (document, "script", "twitter-wjs"));</script></div>';
+      var linkedin = "<div><script src='https://platform.linkedin.com/in.js' type='text/javascript'>lang: en_US</script><script type='IN/Share' data-url='"+tt+"'></script></div>";
+      //var copylink = "<div><input type='text' value='"+tt+"' id='myInput'><button onclick = 'myFunction()'>Copy Link</button><script>function myFunction(){var copyText = document.getElementById('myInput'); copyText.select(); copyText.setSelectionRange(0, 99999); document.execCommand('copy'); alert('Copied the link: ' + copyText.value);}</script></div>";
+    
+      var html = '<html><body><h>'+facebook+'</h><br><br><h>'+twitter+'</h><br><h>'+linkedin+'</h></body></html>';
+      const iframe = document.createElement("IFRAME");
+          iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(html);
+          iframe.height = '140px';
+          document.body.appendChild(iframe);
+
+      div
+      .append(testing_label)
+      .append("</br>")
+      .append(iframe);
+
+      return div;
+
+    };
+
+    // shareDialog //
+    const shareDialog = function() {
+      
+      const jvn_share_modal = dialog.modal({
+        show: false,
+        title: "Share Dialog",
+        body: shareUI,
+        notebook: Jupyter.notebook,
+      });
+
+      jvn_share_modal.modal("show");
+      };
+
     const saveParams = function() {
       /**
        * Initializes a dialog modal triggered by a dropdown button on the toolbar
@@ -662,10 +838,16 @@ define([
         .addClass("btn btn-primary")
         .text("Settings");
 
+        const option4 = $("<button/>")
+        .attr("id","jvn_module1_option4")
+        .addClass("btn btn-primary")
+        .text("ShareDialog");
+
       div
         .append(option1)
         .append(option2)
-        .append(option3);
+        .append(option3)
+        .append(option4);
 
       return div;
     };
@@ -691,9 +873,11 @@ define([
           const option1 = $("#jvn_module1_option1");
           const option2 = $("#jvn_module1_option2");
           const option3 = $("#jvn_module1_option3");
+          const option4 = $("#jvn_module1_option4");
           option1.click(() => openModal(saveParams));
-          option2.click(() => alert("feature coming soon"));
+          option2.click(() => sidebar());
           option3.click(() => openModal(clearParams));
+          option4.click(() => openModal(shareDialog));
         }
       });
       const modal = $(jvn_dropdown_modal).find(".modal-content");
@@ -761,6 +945,84 @@ define([
     jvn_notif.inner.text("Committing to Jovian....");
     jvn_notif.element.attr("disabled", true);
   }
+
+  // function for sidebar, activates when option 2 is selected from dropdown menu
+  function sidebar(modal, option) {
+
+    // made the notebook float left
+  var original = document.getElementById("notebook-container");
+  original.style.width = "79%";
+  original.style.cssFloat = "right";
+
+  // ADD div element to the page
+  var div = document.createElement("div");
+
+  // X button to close sidebar
+  var button = document.createElement("BUTTON");
+  button.innerHTML = "X";
+  button.style.color = "black";
+  button.style.cssFloat = "right";
+  div.appendChild(button); 
+  
+  //append break
+  var br = document.createElement("br");
+  div.appendChild(br);
+  
+  div.style.width = "20%";
+  div.style.height = "450px";
+  div.style.marginTop = "-100px";
+  div.style.background = "white";
+  div.style.color = "black";
+  div.style.cssFloat = "left";
+  
+  // Jovian logo
+  var Jlogo = document.createElement("IMG");
+  Jlogo.setAttribute('src','https://www.jovian.ml/jovian_logo.svg');
+  Jlogo.setAttribute('width','250px');
+  div.appendChild(Jlogo);
+
+  //append break
+  var br = document.createElement("br");
+  div.appendChild(br);
+
+  //display Username / notebook_name
+  var htmlTesting = '<html><body><h3 style="color:#585858;"><center>'+displayName+' / '+displayNotebook+'</center></h3><center><h3 style="color:#585858;">Version Control</h3></center></body></html>';
+  var iframeTesting = document.createElement("IFRAME");
+      iframeTesting.src = 'data:text/html;charset=utf-8,' + encodeURI(htmlTesting);
+      iframeTesting.height = '140px';
+      iframeTesting.width = '250px';
+      //iframeTesting.style.border = '0';
+      document.body.appendChild(iframeTesting);
+div.append(iframeTesting);
+
+  
+  //Share Dialog
+  var facebook = "<div><script async defer crossorigin='anonymous' src='https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v5.0'></script><script type='text/javascript'>var V = tt;</script><div class='fb-share-button' data-href='"+tt+"' data-layout='button_count' data-size='large'><a target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fjovian.ml%2F&amp;src=sdkpreparse' class='fb-xfbml-parse-ignore'></a></div>";
+  var twitter = '<div><a class="twitter-share-button" href="https://twitter.com/intent/tweet" data-size="large" data-text="custom text" data-url='+tt+' data-hashtags="" data-via="" data-related="twitterapi,twitter">Tweet</a><script>window.twttr = (function(d, s, id) { var js, fjs = d.getElementsByTagName(s)[0], t = window.twttr || {}; if (d.getElementById(id)) return t; js = d.createElement(s); js.id = id; js.src = "https://platform.twitter.com/widgets.js"; fjs.parentNode.insertBefore(js, fjs); t._e = []; t.ready = function(f) { t._e.push(f);}; return t;} (document, "script", "twitter-wjs"));</script></div>';
+  var linkedin = "<div><script src='https://platform.linkedin.com/in.js' type='text/javascript'>lang: en_US</script><script type='IN/Share' data-url='"+tt+"'></script></div>";
+  var html = '<html><body><center><table><tr><th>'+facebook+'</th><th>'+twitter+'</th></tr></table></center><br><h><center>'+linkedin+'</center></h></body></html>';
+
+  var iframe = document.createElement("IFRAME");
+      iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(html);
+      iframe.height = '140px';
+      iframe.width = '250px';
+      //iframe.style.border = '0';
+      document.body.appendChild(iframe);
+div.append(iframe);
+  //div.append(formParamsUI());
+  
+
+
+  button.addEventListener ("click", function() {
+    original.style.cssFloat = "none";
+    div.remove();
+  });
+
+div.style.top= "20px";
+document.getElementById("notebook").appendChild(div); 
+
+}
+
 
   function openModal(func) {
     // Helper function; which use to open a new window(modal)
